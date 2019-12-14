@@ -1,10 +1,41 @@
 ﻿using System;
+using System.Linq;
+using AvisAPI.Domain.Contracts;
+using AvisAPI.Domain.Entities;
+using AvisAPI.Domain.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
 namespace AvisAPI.DbContext
 {
-    public class AvisDbContext
+    public class AvisDbContext : IdentityDbContext<AppUser>
     {
-        public AvisDbContext()
+        public AvisDbContext(DbContextOptions<AvisDbContext> options) : base(options)
         {
+            Database.Migrate();
+        }
+
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<Fixture> Fixtures { get; set; }
+
+        public override int SaveChanges()
+        {
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added
+                || e.State == EntityState.Modified);
+
+            foreach (var entry in entries)
+            {
+                var entity = entry.Entity as IEntity;
+                entity.UpdatedAt = DateTimeOffset.Now;
+
+                if (entry.State == EntityState.Added)
+                {
+                    entity.CreatedAt = DateTimeOffset.Now;
+                }
+            }
+
+            return base.SaveChanges();
         }
     }
 }

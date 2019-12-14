@@ -1,7 +1,12 @@
 ﻿using System;
+
 namespace AvisAPI.Domain.Entities
 {
-    public enum EMatchStatus
+    public enum EMatchStatus : byte
     {
+        Pending,
+        Ongoing,
+        Completed,
+        Cancelled
     }
 }

@@ -139,7 +139,7 @@ namespace AvisAPI.Migrations
                     b.Property<int>("AwayGoals")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("AwayTeamId")
+                    b.Property<Guid>("AwayTeamId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -148,7 +148,7 @@ namespace AvisAPI.Migrations
                     b.Property<int>("HomeGoals")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("HomeTeamId")
+                    b.Property<Guid>("HomeTeamId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("MatchDate")
@@ -308,12 +308,16 @@ namespace AvisAPI.Migrations
             modelBuilder.Entity("AvisAPI.Domain.Models.Fixture", b =>
                 {
                     b.HasOne("AvisAPI.Domain.Entities.Team", "AwayTeam")
-                        .WithMany()
-                        .HasForeignKey("AwayTeamId");
+                        .WithMany("AwayMatches")
+                        .HasForeignKey("AwayTeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AvisAPI.Domain.Entities.Team", "HomeTeam")
-                        .WithMany()
-                        .HasForeignKey("HomeTeamId");
+                        .WithMany("HomeMatches")
+                        .HasForeignKey("HomeTeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
