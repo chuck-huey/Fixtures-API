@@ -6,6 +6,7 @@ using AvisAPI.DbContext;
 using AvisAPI.Domain.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +32,8 @@ namespace AvisAPI
         {
             services.AddControllers();
             services.AddDbContext<AvisDbContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("DbConnectionString")));
+                    options.UseLazyLoadingProxies()
+                    .UseNpgsql(Configuration.GetConnectionString("DbConnectionString")));
 
             services.AddIdentity<AppUser, IdentityRole>(option =>
             {
@@ -51,11 +53,23 @@ namespace AvisAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseExceptionHandler(appBuilder =>
+                {
+                    appBuilder.Run(async (context) =>
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("An unexpected fault happened. Please try again later.");
+                    });
+                });
+            }
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
